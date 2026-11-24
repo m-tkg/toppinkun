@@ -39,7 +39,7 @@ CLAUDE.md 雛形）が入っている。
 ```sh
 gh repo create m-tkg/<name>kun --template m-tkg/kun-template --public --clone
 cd <name>kun
-bash Scripts/rename.sh <Name>kun   # プレースホルダ Toppinkun をアプリ名へ一括置換（kun 末尾必須）
+bash Scripts/rename.sh <Name>kun   # プレースホルダ Newkun をアプリ名へ一括置換（kun 末尾必須）
 swift test && LOCAL=1 bash Scripts/bundle.sh debug   # 起動確認
 ```
 
