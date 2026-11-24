@@ -31,7 +31,9 @@
   - `ToppinkunCore/PinState.swift`: 固定対象と「ミラーを出す/隠す/解除する」判定の純粋な状態機械（TDD）。
   - `PinController`: OS イベント（前面アプリ変化・アプリ終了・追従タイマー）を `PinState` へ入力し、出力を実行する。
   - `WindowLocator`: `CGWindowList` で前面ウィンドウ・ウィンドウ情報を取得（座標は左上原点。AppKit へ変換して使う）。
-  - `WindowMirrorStream`: `SCContentFilter(desktopIndependentWindow:)` で1枚をキャプチャ（30fps、固定中は常時稼働）。
+  - `WindowMirrorStream`: `SCContentFilter(desktopIndependentWindow:)` で1枚をキャプチャ（30fps）。
+    **キャプチャはミラー表示中（他アプリが前面の間）だけ動かす**。キャプチャ中は macOS が対象ウィンドウのタイトルバーに
+    紫の「共有中」バッジを重ねて信号機ボタンを塞ぐため（消す公開 API は無い）。再表示時は停止時の最終フレームを先に出す。
   - `MirrorPanel`: 非アクティブ化・枠なし・全 Space の `NSPanel`。フレームの `IOSurface` を layer に直接載せる。
   - `WindowActivator`: CGWindowID と AX 要素を対応付ける公開 API が無いため、**フレーム一致**で AX ウィンドウを特定して raise。
 - 権限（TCC）:

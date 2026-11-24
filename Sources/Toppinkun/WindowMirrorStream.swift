@@ -18,6 +18,8 @@ final class WindowMirrorStream: NSObject, SCStreamOutput, SCStreamDelegate, @unc
     private let onStop: @MainActor (Error?) -> Void
     private let queue = DispatchQueue(label: "com.mtkg.toppinkun.mirror")
     private var stream: SCStream?
+    /// 自分から止めた後のエラー通知は無視する（付け替え・非表示で止めたストリームが固定を外さないように）。
+    private var isStopped = false
 
     init(windowID: CGWindowID,
          onFrame: @escaping @MainActor (IOSurface) -> Void,
@@ -37,6 +39,8 @@ final class WindowMirrorStream: NSObject, SCStreamOutput, SCStreamDelegate, @unc
         try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: queue)
         try await stream.startCapture()
         self.stream = stream
+        // 開始待ちの間に stop() された場合は、ここで止める。
+        if isStopped { stop() }
     }
 
     /// ウィンドウのサイズ変更に追従する。
@@ -47,6 +51,7 @@ final class WindowMirrorStream: NSObject, SCStreamOutput, SCStreamDelegate, @unc
     }
 
     func stop() {
+        isStopped = true
         let stream = self.stream
         self.stream = nil
         stream?.stopCapture { _ in }
@@ -85,6 +90,7 @@ final class WindowMirrorStream: NSObject, SCStreamOutput, SCStreamDelegate, @unc
 
     func stream(_ stream: SCStream, didStopWithError error: Error) {
         log.error("stream stopped: \(error.localizedDescription, privacy: .public)")
+        guard !isStopped else { return }
         DispatchQueue.main.async { [onStop] in
             MainActor.assumeIsolated { onStop(error) }
         }
