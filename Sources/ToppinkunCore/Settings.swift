@@ -7,9 +7,12 @@ public struct Settings: Codable, Equatable {
     /// 「一般」まわりの設定。
     /// 自動起動（ログイン項目）はシステム側が source of truth のため、ここには保存しない。
     public var general: GeneralSettings
+    /// ウィンドウ固定（最前面表示）の設定。
+    public var pin: PinSettings
 
-    public init(general: GeneralSettings = GeneralSettings()) {
+    public init(general: GeneralSettings = GeneralSettings(), pin: PinSettings = PinSettings()) {
         self.general = general
+        self.pin = pin
     }
 
     /// 既定設定。
@@ -17,13 +20,14 @@ public struct Settings: Codable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case general
-        // TODO: 機能を追加したらキーを足す（例: case history）。
+        case pin
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.general = try container.decodeIfPresent(GeneralSettings.self, forKey: .general)
             ?? GeneralSettings()
+        self.pin = try container.decodeIfPresent(PinSettings.self, forKey: .pin) ?? PinSettings()
     }
 }
 
@@ -32,4 +36,23 @@ public struct Settings: Codable, Equatable {
 /// `decodeIfPresent ?? 既定値` のパターンで欠損キーを補完する）。
 public struct GeneralSettings: Codable, Equatable {
     public init() {}
+}
+
+/// ウィンドウ固定の設定。
+public struct PinSettings: Codable, Equatable {
+    /// 前面ウィンドウを固定/解除するホットキー。
+    public var hotKey: HotKeyConfig
+
+    public init(hotKey: HotKeyConfig = .defaultPin) {
+        self.hotKey = hotKey
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case hotKey
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.hotKey = try c.decodeIfPresent(HotKeyConfig.self, forKey: .hotKey) ?? .defaultPin
+    }
 }
