@@ -5,20 +5,20 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Newkun</string>
+	<string>Toppinkun</string>
 	<key>CFBundleExecutable</key>
-	<string>Newkun</string>
+	<string>Toppinkun</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.mtkg.newkun</string>
+	<string>com.mtkg.toppinkun</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
 		<string>ja</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>Newkun</string>
+	<string>Toppinkun</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

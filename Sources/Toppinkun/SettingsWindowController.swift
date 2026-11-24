@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 import KunAppKit
-import NewkunCore
+import ToppinkunCore
 
 /// 設定ウィンドウ（SwiftUI の SettingsView を NSWindow にホストする）。
 /// 表示中は Dock アイコンも出すため、表示/クローズに合わせて activation policy を切り替える。
@@ -12,7 +12,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let loginItem = LoginItemController(
         requiresApprovalMessage: { L.string("login_item.requires_approval") })
 
-    init(initialSettings: NewkunCore.Settings, onChange: @escaping (NewkunCore.Settings) -> Void) {
+    init(initialSettings: ToppinkunCore.Settings, onChange: @escaping (ToppinkunCore.Settings) -> Void) {
         self.viewModel = SettingsViewModel(settings: initialSettings, onChange: onChange)
         super.init()
     }
@@ -25,7 +25,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             let window = NSWindow(contentViewController: hosting)
             window.title = L.string("settings.window.title")
             window.styleMask = [.titled, .closable, .miniaturizable]
-            window.setContentSize(NSSize(width: 460, height: 320))
+            window.setContentSize(NSSize(width: 520, height: 380))
             window.isReleasedWhenClosed = false
             window.delegate = self
             self.window = window

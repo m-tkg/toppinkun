@@ -9,10 +9,15 @@ final class StatusBarController: NSObject {
     /// ステータスメニュー本体。kuntraykun 連携時はこのメニューを指定座標へ popUp する。
     private let menu = NSMenu()
 
+    private let togglePin: () -> Void
+    private let unpin: () -> Void
     private let openSettings: () -> Void
     private let checkForUpdate: () -> Void
     private let quitApp: () -> Void
     private var updateItem: NSMenuItem!
+    private var pinToggleItem: NSMenuItem!
+    private var pinnedInfoItem: NSMenuItem!
+    private var unpinItem: NSMenuItem!
     /// 新版ありを示す赤バッジ（アイコン右下にオーバーレイ）。
     private var badgeView: NSView?
     /// メニュー内容（文言・チェック状態）が変わったときの通知。kuntraykun 連携の再書き出しに使う。
@@ -26,11 +31,15 @@ final class StatusBarController: NSObject {
     }
 
     init(
+        togglePin: @escaping () -> Void,
+        unpin: @escaping () -> Void,
         openSettings: @escaping () -> Void,
         checkForUpdate: @escaping () -> Void,
         quit: @escaping () -> Void
     ) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        self.togglePin = togglePin
+        self.unpin = unpin
         self.openSettings = openSettings
         self.checkForUpdate = checkForUpdate
         self.quitApp = quit
@@ -41,7 +50,7 @@ final class StatusBarController: NSObject {
             //       （テンプレート画像として自動で読み込まれる）。無ければ SF Symbol で代用する。
             if let template = Self.menuBarImage() {
                 button.image = template
-            } else if let symbol = NSImage(systemSymbolName: "app.dashed", accessibilityDescription: "Newkun") {
+            } else if let symbol = NSImage(systemSymbolName: "pin", accessibilityDescription: "Toppinkun") {
                 symbol.isTemplate = true
                 button.image = symbol
             } else {
@@ -64,13 +73,30 @@ final class StatusBarController: NSObject {
         versionItem.isEnabled = false
         menu.addItem(versionItem)
         menu.addItem(.separator())
-        // TODO: 固有機能のメニュー項目（入口だけ）はここに足す。
+        pinToggleItem = menuItem(title: L.string("menu.pin_toggle"), action: #selector(handleTogglePin), key: "")
+        menu.addItem(pinToggleItem)
+        pinnedInfoItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        pinnedInfoItem.isEnabled = false
+        menu.addItem(pinnedInfoItem)
+        unpinItem = menuItem(title: L.string("menu.unpin"), action: #selector(handleUnpin), key: "")
+        menu.addItem(unpinItem)
+        menu.addItem(.separator())
         menu.addItem(menuItem(title: L.string("menu.settings"), action: #selector(handleOpenSettings), key: ","))
         updateItem = menuItem(title: Self.checkUpdateTitle, action: #selector(handleCheckForUpdate), key: "")
         menu.addItem(updateItem)
         menu.addItem(.separator())
         menu.addItem(menuItem(title: L.string("menu.quit"), action: #selector(handleQuit), key: "q"))
         statusItem.menu = menu
+        setPinned(nil, hotKey: nil)
+    }
+
+    /// 固定状態とホットキー表示をメニューへ反映する。
+    func setPinned(_ name: String?, hotKey: String?) {
+        let base = L.string("menu.pin_toggle")
+        pinToggleItem.title = hotKey.map { "\(base)  \($0)" } ?? base
+        pinnedInfoItem.title = name.map { L.format("menu.pinned", $0) } ?? L.string("menu.not_pinned")
+        unpinItem.isHidden = (name == nil)
+        onMenuContentChanged?()
     }
 
     func setUpdateAvailable(tag: String) {
@@ -118,6 +144,8 @@ final class StatusBarController: NSObject {
         return item
     }
 
+    @objc private func handleTogglePin() { togglePin() }
+    @objc private func handleUnpin() { unpin() }
     @objc private func handleOpenSettings() { openSettings() }
     @objc private func handleCheckForUpdate() { checkForUpdate() }
     @objc private func handleQuit() { quitApp() }

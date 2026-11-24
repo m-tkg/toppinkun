@@ -3,8 +3,8 @@
 # 使い方: bash Scripts/bundle.sh [debug|release]   (既定: release)
 #
 # ローカル検証用ビルド: LOCAL=1 bash Scripts/bundle.sh debug
-#   本番アプリ(com.mtkg.newkun)と TCC 権限が衝突しないよう、バンドルID と表示名を分けた
-#   「Newkun (Local)」を生成する。メニューバーには「ローカル」と併記され本番と区別できる。
+#   本番アプリ(com.mtkg.toppinkun)と TCC 権限が衝突しないよう、バンドルID と表示名を分けた
+#   「Toppinkun (Local)」を生成する。メニューバーには「ローカル」と併記され本番と区別できる。
 #
 # 署名:
 #   既定では Developer ID Application（team id 指定）で署名する。安定した署名にすると、
@@ -21,11 +21,11 @@ LOCAL="${LOCAL:-0}"
 
 # ローカル検証ビルドはバンドルID/表示名を分けて本番と権限を分離する。
 if [[ "$LOCAL" == "1" ]]; then
-  APP_NAME="Newkun (Local)"
-  BUNDLE_ID="com.mtkg.newkun.local"
+  APP_NAME="Toppinkun (Local)"
+  BUNDLE_ID="com.mtkg.toppinkun.local"
 else
-  APP_NAME="Newkun"
-  BUNDLE_ID="com.mtkg.newkun"
+  APP_NAME="Toppinkun"
+  BUNDLE_ID="com.mtkg.toppinkun"
 fi
 APP="$ROOT/$APP_NAME.app"
 
@@ -41,10 +41,10 @@ echo "==> Bundling $APP"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources"
-cp "$BIN_DIR/Newkun" "$APP/Contents/MacOS/Newkun"
+cp "$BIN_DIR/Toppinkun" "$APP/Contents/MacOS/Toppinkun"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 
-# ローカル検証ビルドはバンドルID/表示名を差し替える（CFBundleExecutable は Newkun のまま）。
+# ローカル検証ビルドはバンドルID/表示名を差し替える（CFBundleExecutable は Toppinkun のまま）。
 if [[ "$LOCAL" == "1" ]]; then
   /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$APP/Contents/Info.plist"
   /usr/libexec/PlistBuddy -c "Set :CFBundleName $APP_NAME" "$APP/Contents/Info.plist"
@@ -53,7 +53,7 @@ fi
 
 # SwiftPM が生成するリソースバンドル（ローカライズ文字列 en/ja を含む）。
 # Localization.swift の `L` が Contents/Resources から解決するため、ここに配置する。
-RES_BUNDLE="$BIN_DIR/Newkun_Newkun.bundle"
+RES_BUNDLE="$BIN_DIR/Toppinkun_Toppinkun.bundle"
 if [[ ! -d "$RES_BUNDLE" ]]; then
   echo "error: リソースバンドルが見つかりません: $RES_BUNDLE" >&2
   exit 1

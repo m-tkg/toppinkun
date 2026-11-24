@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Newkun",
+    name: "Toppinkun",
     // ローカライズ済みリソース（en/ja）を持つため既定言語を指定する。
     defaultLocalization: "en",
     platforms: [
@@ -19,13 +19,13 @@ let package = Package(
         // 固有機能のロジックはここに TDD で足す。
         // （ReleaseInfo / VersionComparator は kunkit の KunUpdateKit を参照する）
         .target(
-            name: "NewkunCore"
+            name: "ToppinkunCore"
         ),
         // 実行ファイル本体: メニューバー常駐・設定UI・アップデート・kuntraykun 連携。
         .executableTarget(
-            name: "Newkun",
+            name: "Toppinkun",
             dependencies: [
-                "NewkunCore",
+                "ToppinkunCore",
                 .product(name: "KunIntegrationBridge", package: "kunkit"),
                 .product(name: "KunUpdateKit", package: "kunkit"),
                 .product(name: "KunSupport", package: "kunkit"),
@@ -37,8 +37,8 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "NewkunCoreTests",
-            dependencies: ["NewkunCore"]
+            name: "ToppinkunCoreTests",
+            dependencies: ["ToppinkunCore"]
         ),
     ]
 )

@@ -1,10 +1,9 @@
 import XCTest
-@testable import NewkunCore
+@testable import ToppinkunCore
 
-/// `NewkunCore.Settings` の Codable 互換性テスト。
+/// `ToppinkunCore.Settings` の Codable 互換性テスト。
 /// 設定の永続化そのもの（ファイル入出力）は kunkit の `KunSettingsStore` が担うため、
 /// ここではアプリ固有の設定モデルが「欠損キーを既定値で補完する」前方/後方互換を検証する。
-/// 固有の設定項目を足したら、その既定値・ラウンドトリップもここに追加すること。
 final class SettingsTests: XCTestCase {
     private let encoder: JSONEncoder = {
         let e = JSONEncoder()
@@ -13,7 +12,8 @@ final class SettingsTests: XCTestCase {
     }()
 
     func testEncodeDecodeRoundTrip() throws {
-        let settings = Settings.default
+        var settings = Settings.default
+        settings.pin.hotKey = HotKeyConfig(keyCode: 0, carbonModifiers: HotKeyConfig.optionKey, keyLabel: "A")
         let data = try encoder.encode(settings)
         let decoded = try JSONDecoder().decode(Settings.self, from: data)
         XCTAssertEqual(decoded, settings)
@@ -24,5 +24,16 @@ final class SettingsTests: XCTestCase {
         let data = Data("{}".utf8)
         let decoded = try JSONDecoder().decode(Settings.self, from: data)
         XCTAssertEqual(decoded, .default)
+    }
+
+    func testDefaultPinHotKeyIsControlCommandT() {
+        XCTAssertEqual(Settings.default.pin.hotKey, .defaultPin)
+    }
+
+    func testDecodesLegacyFileWithoutPinSection() throws {
+        // テンプレート由来の古い設定（general のみ）でも固定設定は既定値で補完される。
+        let data = Data(#"{"general":{}}"#.utf8)
+        let decoded = try JSONDecoder().decode(Settings.self, from: data)
+        XCTAssertEqual(decoded.pin, PinSettings())
     }
 }

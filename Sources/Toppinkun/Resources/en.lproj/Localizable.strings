@@ -1,13 +1,13 @@
 /* Menu (StatusBarController) */
-"menu.version" = "Newkun %@";
+"menu.version" = "Toppinkun %@";
 "menu.settings" = "Settings…";
 "menu.check_update" = "Check for Updates…";
 "menu.install_update" = "Install Update %@…";
-"menu.quit" = "Quit Newkun";
+"menu.quit" = "Quit Toppinkun";
 "menu_bar.local" = "Local";
 
 /* Settings window */
-"settings.window.title" = "Newkun Settings";
+"settings.window.title" = "Toppinkun Settings";
 "tab.general" = "General";
 
 "button.cancel" = "Cancel";
@@ -17,7 +17,7 @@
 "settings.version" = "Version %@";
 
 /* Update flow */
-"update.latest" = "Newkun %@ is up to date.";
+"update.latest" = "Toppinkun %@ is up to date.";
 "update.check_failed" = "Failed to check for updates: %@";
 "update.available.title" = "Update %@ is available";
 "update.available.body" = "Current version is %@. Install now?";
@@ -26,7 +26,7 @@
 "update.failed" = "Update failed: %@";
 
 /* Login item */
-"login_item.requires_approval" = "Login items are disabled. Enable Newkun in System Settings > General > Login Items.";
+"login_item.requires_approval" = "Login items are disabled. Enable Toppinkun in System Settings > General > Login Items.";
 
 /* Alerts */
 "alert.error.title" = "Error";
@@ -41,3 +41,17 @@
 "error.command_failed" = "Command failed: %@";
 "error.no_app_in_archive" = "No .app found in the archive.";
 "error.bundle_id_mismatch" = "Downloaded app's bundle ID does not match.";
+
+/* Pin (StatusBarController / Settings) */
+"menu.pin_toggle" = "Pin/Unpin Front Window on Top";
+"menu.pinned" = "Pinned: %@";
+"menu.not_pinned" = "No window pinned";
+"menu.unpin" = "Unpin";
+"tab.pin" = "Pin";
+"pin.hotkey" = "Pin/unpin hotkey";
+"pin.description" = "Press the hotkey to keep the front window always on top. Press it again on the same window to unpin, or on another window to switch. While you use other apps, the pinned window is shown as a live mirror; click it to bring the real window forward.";
+"permission.screen_capture" = "Screen Recording (required)";
+"permission.accessibility" = "Accessibility (optional, for precise focusing on click)";
+"permission.granted" = "Granted";
+"permission.grant" = "Grant…";
+"hotkey.recording" = "Press a key…";

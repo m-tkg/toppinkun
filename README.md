@@ -1,52 +1,52 @@
-# kun-template
+# Toppinkun
 
-kun シリーズ（macOS メニューバー常駐アプリ群）の新規開発用テンプレート。
-プレースホルダのアプリ名は **Newkun**（bundle ID `com.mtkg.newkun`）で、そのままビルド・起動できる。
+指定したウィンドウを**常に最前面に表示**する macOS メニューバー常駐アプリ（kun シリーズ）。
+ホットキー1つで、いま使っているウィンドウを最前面に固定できます。
 
-**このリポジトリは共通ガイド [`CLAUDE_base.md`](./CLAUDE_base.md) の canonical（唯一の一次ソース）も兼ねる**。
-kun シリーズ共通の方針（Swift Package 構成・ローカライズ・アップデート・kunkit 連携・リリース・ブランチ運用）は
-`CLAUDE_base.md` にまとまっており、規約を変えるときはここを編集する。各アプリの `CLAUDE.md` は固有事項のみを持ち、
-共通方針は本ファイルを参照する（既存アプリは、本リポジトリを兄弟ディレクトリに clone した上で `../kun-template/CLAUDE_base.md` を参照する）。
+## 特長
+
+- **ホットキーで固定/解除**: 前面のウィンドウで `⌃⌘T`（変更可）を押すと固定。同じウィンドウでもう一度押すと解除、
+  別のウィンドウで押すと付け替え（同時に固定できるのは1枚）
+- **他のアプリを使っている間も手前に表示**: 固定したウィンドウをライブ映像で最前面に表示
+- **クリックで本物を前面へ**: 映像をクリックすると本物のウィンドウが前面に出て、そのまま操作できる
+- **自動解除・追従**: ウィンドウを閉じる/アプリを終了すると自動で解除。移動・リサイズにも追従
+- [kuntraykun](https://github.com/m-tkg/kuntraykun) によるメニューバーアイコンの集約に対応
+- ログイン時の自動起動、GitHub Releases からの自己アップデートに対応
+
+## 動作環境
+
+- macOS 13 以降
+- **画面収録**の許可が必要（固定ウィンドウの映像表示のため）
+- **アクセシビリティ**の許可は任意（クリック時に対象ウィンドウを確実に前面化するため）
+
+## インストール
+
+1. [Releases](https://github.com/m-tkg/toppinkun/releases/latest) から `Toppinkun.zip` をダウンロード
+2. 展開して `Toppinkun.app` を `/Applications` に移動して起動
+3. 画面収録の許可を求められたら許可し、アプリを再起動する
+   （一覧に表示されない場合は、システム設定 > プライバシーとセキュリティ > 画面収録とシステムオーディオ録音 の
+   「＋」から `Toppinkun.app` を追加）
 
 ## 使い方
 
+1. 最前面に置きたいウィンドウを前面にして `⌃⌘T` を押す
+2. 他のアプリに切り替えても、固定したウィンドウが手前に表示され続ける
+3. 解除するときは、固定したウィンドウでもう一度 `⌃⌘T` を押すか、メニューの「固定を解除」を選ぶ
+
+ホットキーと権限の状態は、メニューの「設定…」→「固定」タブで確認・変更できます。
+
+## 制約
+
+- 他のアプリを使っている間に表示されるのは映像です。操作するには映像をクリックして本物を前面に出してください。
+- 固定したウィンドウを最小化すると、最後の映像が表示されたままになります。
+
+## 開発
+
+純粋ロジック（`ToppinkunCore`）は TDD、UI/OS 連携は実機で手動確認します。
+
 ```sh
-# 1. テンプレートから新規リポジトリを作成して clone する
-gh repo create m-tkg/<name>kun --template m-tkg/kun-template --public --clone
-cd <name>kun
-
-# 2. プレースホルダ名を一括リネームする（Newkun → <Name>kun / newkun → <name>kun）
-bash Scripts/rename.sh <Name>kun    # 例: bash Scripts/rename.sh Fookun
-
-# 3. ビルド・テスト・ローカル起動確認
-swift test
-LOCAL=1 bash Scripts/bundle.sh debug          # 署名証明書が無い環境は LOCAL=1 AD_HOC=1 ...
-open "<Name>kun (Local).app"
-
-# 4. リリース用 Secrets（署名＋公証の計6つ）を登録する
-~/git/github.com/m-tkg/setup-release-secrets.sh -r m-tkg/<name>kun
+swift test                              # 純粋ロジックのテスト
+LOCAL=1 bash Scripts/bundle.sh debug    # ローカル検証用の .app（本番と別 bundle ID）
 ```
 
-リネーム後は `CLAUDE.md` 末尾の「固有事項」節を埋め、`Scripts/rename.sh` を削除してよい。
-固有機能は `<Name>kunCore` に TDD で実装し、設定タブ・メニュー項目・en/ja 対訳を足していく
-（`CLAUDE.md` の「開発の進め方」参照）。
-
-## 含まれる機能
-
-- **メニューバー常駐**（`LSUIElement` / `.accessory` 起動・多重起動防止・Dock アイコンなし）
-- **2 ターゲット構成**（`NewkunCore` 純粋ロジック＋テスト / `Newkun` 実行ファイル）
-- **日英ローカライズ**（`L.string` / `Resources/{en,ja}.lproj` / `CFBundleLocalizations`）
-- **自己アップデート**（kunkit `KunUpdateKit` の ETag 付き取得・1時間ごと＋スリープ復帰時のサイレントチェック・
-  メニューバーアイコンの赤バッジ・zip DL → 入替 → 再起動）
-- **kuntraykun 連携**（kunkit `KunIntegrationBridge`。アイコン集約 v1〜v4 対応済み）
-- **自動起動**（`SMAppService` のログイン項目トグル。設定「一般」タブ）
-- **設定ダイアログ**（SwiftUI + NSWindow・タブ構成・JSON 永続化・表示中は Dock アイコン表示）
-- **ローカルビルド分離**（`LOCAL=1 bash Scripts/bundle.sh` で bundle ID `.local`・「ローカル」併記）
-- **リリース CI**（`v*` タグ起点。署名・公証、Secrets 未設定時は ad-hoc / 公証スキップにフォールバック）
-- **`make release-tag`**（安全チェック付きのタグ作成・push）
-
-## アイコン
-
-- `Resources/MenuBarIcon.png` を置くとメニューバーのテンプレート画像として使われる
-  （無い間は SF Symbol で代用）。
-- `Resources/AppIcon.png` を置くと `bundle.sh` が `.icns` を生成して同梱する。
+開発方針の詳細は [`CLAUDE.md`](CLAUDE.md)（共通方針は [`CLAUDE_base.md`](CLAUDE_base.md)）を参照。
