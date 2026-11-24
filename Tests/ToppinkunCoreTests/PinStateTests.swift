@@ -74,39 +74,33 @@ final class PinStateTests: XCTestCase {
         XCTAssertEqual(state.handle(.unpinRequested), [])
     }
 
-    // MARK: - 前面の変化（再前面化）
+    // MARK: - 前面アプリの変化（ミラーの表示/非表示）
 
-    func testFocusMovingToOtherAppRaisesPinnedWindow() {
+    func testOtherAppBecomingFrontmostShowsMirror() {
         var state = PinState<FakeWindow>()
         _ = state.handle(.toggleRequested(focused: a1))
-        XCTAssertEqual(state.handle(.focusChanged(focused: b1)), [.raise(a1)])
+        XCTAssertEqual(state.handle(.frontmostAppChanged(pid: 200)), [.showMirror(a1)])
         XCTAssertEqual(state.pinned, a1)
     }
 
-    func testFocusChangeWithUnknownFocusedWindowRaises() {
-        // 前面アプリのフォーカスウィンドウが取れない（デスクトップ等）場合も覆われうるので上げ直す。
+    func testUnknownFrontmostAppShowsMirror() {
+        // 前面アプリが取れない場合も覆われうるのでミラーを出す。
         var state = PinState<FakeWindow>()
         _ = state.handle(.toggleRequested(focused: a1))
-        XCTAssertEqual(state.handle(.focusChanged(focused: nil)), [.raise(a1)])
+        XCTAssertEqual(state.handle(.frontmostAppChanged(pid: nil)), [.showMirror(a1)])
     }
 
-    func testFocusOnPinnedWindowItselfDoesNotRaise() {
+    func testPinnedAppBecomingFrontmostHidesMirror() {
+        // 固定中アプリ自身が前面なら本物のウィンドウを直接操作させる。
         var state = PinState<FakeWindow>()
         _ = state.handle(.toggleRequested(focused: a1))
-        XCTAssertEqual(state.handle(.focusChanged(focused: a1)), [])
+        _ = state.handle(.frontmostAppChanged(pid: 200))
+        XCTAssertEqual(state.handle(.frontmostAppChanged(pid: 100)), [.hideMirror(a1)])
     }
 
-    func testFocusOnOtherWindowOfPinnedAppDoesNotRaise() {
-        // 固定中アプリ自身の中でウィンドウを切り替える操作は妨げない
-        // （上げ直すとフォーカスが固定ウィンドウへ奪われるため）。
+    func testFrontmostChangeWhenNothingPinnedDoesNothing() {
         var state = PinState<FakeWindow>()
-        _ = state.handle(.toggleRequested(focused: a1))
-        XCTAssertEqual(state.handle(.focusChanged(focused: a2)), [])
-    }
-
-    func testFocusChangeWhenNothingPinnedDoesNothing() {
-        var state = PinState<FakeWindow>()
-        XCTAssertEqual(state.handle(.focusChanged(focused: b1)), [])
+        XCTAssertEqual(state.handle(.frontmostAppChanged(pid: 200)), [])
     }
 
     // MARK: - 固定対象の消滅
