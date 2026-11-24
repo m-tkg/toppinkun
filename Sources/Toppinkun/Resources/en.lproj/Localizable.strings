@@ -41,3 +41,17 @@
 "error.command_failed" = "Command failed: %@";
 "error.no_app_in_archive" = "No .app found in the archive.";
 "error.bundle_id_mismatch" = "Downloaded app's bundle ID does not match.";
+
+/* Pin (StatusBarController / Settings) */
+"menu.pin_toggle" = "Pin/Unpin Front Window on Top";
+"menu.pinned" = "Pinned: %@";
+"menu.not_pinned" = "No window pinned";
+"menu.unpin" = "Unpin";
+"tab.pin" = "Pin";
+"pin.hotkey" = "Pin/unpin hotkey";
+"pin.description" = "Press the hotkey to keep the front window always on top. Press it again on the same window to unpin, or on another window to switch. While you use other apps, the pinned window is shown as a live mirror; click it to bring the real window forward.";
+"permission.screen_capture" = "Screen Recording (required)";
+"permission.accessibility" = "Accessibility (optional, for precise focusing on click)";
+"permission.granted" = "Granted";
+"permission.grant" = "Grant…";
+"hotkey.recording" = "Press a key…";

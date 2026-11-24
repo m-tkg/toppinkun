@@ -41,3 +41,17 @@
 "error.command_failed" = "コマンドが失敗しました: %@";
 "error.no_app_in_archive" = "アーカイブ内に .app が見つかりません。";
 "error.bundle_id_mismatch" = "ダウンロードしたアプリのバンドルIDが一致しません。";
+
+/* Pin (StatusBarController / Settings) */
+"menu.pin_toggle" = "前面ウィンドウを最前面に固定/解除";
+"menu.pinned" = "固定中: %@";
+"menu.not_pinned" = "固定中のウィンドウなし";
+"menu.unpin" = "固定を解除";
+"tab.pin" = "固定";
+"pin.hotkey" = "固定/解除ホットキー";
+"pin.description" = "ホットキーを押すと、前面のウィンドウを最前面に固定します。同じウィンドウで再度押すと解除、別のウィンドウで押すと付け替えます。固定中のウィンドウは他のアプリを使っている間もミラー表示され、クリックすると本物のウィンドウが前面に出ます。";
+"permission.screen_capture" = "画面収録（必須）";
+"permission.accessibility" = "アクセシビリティ（任意・クリック時の前面化を正確にする）";
+"permission.granted" = "許可済み";
+"permission.grant" = "許可…";
+"hotkey.recording" = "キーを押してください…";

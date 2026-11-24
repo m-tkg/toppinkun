@@ -21,6 +21,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindowController: SettingsWindowController?
     private var updateCheckTimer: Timer?
     private var kuntraykunBridge: KuntraykunBridge?
+    private let pinController = PinController()
+    private let hotKeys = HotKeyManager()
+    private static let pinHotKeyID: UInt32 = 1
 
     // アップデート関連。
     private let updateService = UpdateService()
@@ -30,16 +33,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         settings = store.load()
 
-        // TODO: ここにアプリ固有機能の配線を足す（監視の開始・ホットキー登録・
-        //       コールバックの接続など）。ロジック本体は ToppinkunCore に TDD で実装する。
-
-        applySettings(settings)
-
         statusBar = StatusBarController(
+            togglePin: { [weak self] in self?.pinController.toggle() },
+            unpin: { [weak self] in self?.pinController.unpin() },
             openSettings: { [weak self] in self?.openSettings() },
             checkForUpdate: { [weak self] in self?.startUpdateCheck(interactive: true) },
             quit: { NSApp.terminate(nil) }
         )
+        pinController.onChange = { [weak self] in self?.refreshPinMenu() }
+        applySettings(settings)
+
+        // ミラーに画面収録権限が要る。初回起動時に許可を求めておく（未許可でもホットキー押下時に再要求する）。
+        if !Permissions.hasScreenCapture { Permissions.requestScreenCapture() }
 
         // kuntraykun 連携（kunkit）: 管理対象なら自分のアイコンを隠し、showMenu でメニューを出す。
         // v4: メニュー構造を共有してサブメニュー表示・項目実行にも応じる（初回書き出しは start() 内）。
@@ -57,8 +62,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// 設定を各所へ反映する。
     private func applySettings(_ settings: Settings) {
-        // TODO: 固有機能を追加したら、設定の変更をここで各コンポーネントへ反映する。
-        _ = settings
+        hotKeys.register(id: Self.pinHotKeyID, config: settings.pin.hotKey) { [weak self] in
+            self?.pinController.toggle()
+        }
+        refreshPinMenu()
+    }
+
+    private func refreshPinMenu() {
+        statusBar?.setPinned(pinController.pinned?.displayName, hotKey: settings.pin.hotKey.displayString)
     }
 
     private func openSettings() {
