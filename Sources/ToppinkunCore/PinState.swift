@@ -12,8 +12,8 @@ public enum PinEvent<Window: PinnableWindow>: Equatable {
     case toggleRequested(focused: Window?)
     /// メニュー等からの明示的な解除。
     case unpinRequested
-    /// 前面アプリ、または前面アプリ内のフォーカスウィンドウが変わった。
-    case focusChanged(focused: Window?)
+    /// 前面アプリが変わった（取れなければ nil）。
+    case frontmostAppChanged(pid: Int32?)
     /// ウィンドウが閉じられた。
     case windowClosed(Window)
     /// アプリが終了した。
@@ -24,17 +24,19 @@ public enum PinEvent<Window: PinnableWindow>: Equatable {
 public enum PinAction<Window: PinnableWindow>: Equatable {
     case pinned(Window)
     case unpinned(Window)
-    /// 固定ウィンドウを最前面へ上げ直す。
-    case raise(Window)
+    /// 固定ウィンドウのミラー（最前面パネル）を表示する。
+    case showMirror(Window)
+    /// ミラーを隠して本物のウィンドウを直接操作させる。
+    case hideMirror(Window)
     /// ホットキーが押されたが固定できるウィンドウが無かった。
     case noFocusedWindow
 }
 
 /// 「最前面に固定するウィンドウ」を1枚だけ管理する純粋な状態機械。
 ///
-/// macOS には他アプリのウィンドウレベルを変える公開 API が無いため、Toppinkun は
-/// 「固定ウィンドウが覆われうる契機（前面の変化）ごとに上げ直す」方式で最前面を擬似的に保つ。
-/// どの契機で上げ直すか・いつ固定を外すかの判定をここに集約する。
+/// macOS には他アプリのウィンドウレベルを変える公開 API が無く、AX の raise でも前面アプリより
+/// 上には出せない。そこで Toppinkun は固定ウィンドウを ScreenCaptureKit で最前面パネルへミラーする。
+/// いつミラーを出す/隠すか・いつ固定を外すかの判定をここに集約する。
 public struct PinState<Window: PinnableWindow> {
     public private(set) var pinned: Window?
 
@@ -56,11 +58,11 @@ public struct PinState<Window: PinnableWindow> {
         case .unpinRequested:
             return unpin()
 
-        case .focusChanged(let focused):
+        case .frontmostAppChanged(let pid):
             guard let current = pinned else { return [] }
-            // 固定中アプリ自身が前面なら上げ直さない（フォーカスを奪わず、アプリ内の切替を妨げない）。
-            if let focused, focused.ownerPID == current.ownerPID { return [] }
-            return [.raise(current)]
+            // 固定中アプリ自身が前面なら本物を直接操作させる。それ以外は覆われうるのでミラーを出す。
+            if pid == current.ownerPID { return [.hideMirror(current)] }
+            return [.showMirror(current)]
 
         case .windowClosed(let window):
             guard pinned == window else { return [] }
