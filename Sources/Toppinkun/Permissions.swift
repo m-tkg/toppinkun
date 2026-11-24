@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import ScreenCaptureKit
 
 /// Toppinkun が使う TCC 権限。
 /// - 画面収録（必須）: 固定ウィンドウを ScreenCaptureKit でミラーするため。
@@ -8,8 +9,17 @@ enum Permissions {
     static var hasScreenCapture: Bool { CGPreflightScreenCaptureAccess() }
 
     /// 未許可ならシステムの許可要求を出す（初回はダイアログ、以降はシステム設定で許可が必要）。
+    ///
+    /// 新しい macOS では `CGRequestScreenCaptureAccess` だけだとシステム設定の一覧に載らないことがあるため、
+    /// ScreenCaptureKit の `SCShareableContent` も呼んで TCC へ確実に登録させる（結果は使わない）。
     @discardableResult
-    static func requestScreenCapture() -> Bool { CGRequestScreenCaptureAccess() }
+    static func requestScreenCapture() -> Bool {
+        let granted = CGRequestScreenCaptureAccess()
+        if !granted {
+            SCShareableContent.getExcludingDesktopWindows(false, onScreenWindowsOnly: true) { _, _ in }
+        }
+        return granted
+    }
 
     static var hasAccessibility: Bool { AXIsProcessTrusted() }
 
