@@ -4,8 +4,8 @@ import KunUpdateKit
 /// 公開 GitHub API（api.github.com）へアクセスし、最新リリースを取得する。
 /// HTTP 取得は kunkit の `GitHubReleaseFetcher`、zip ダウンロードは kunkit の `SelfUpdater` が担う。
 struct UpdateService {
-    static let repoFullName = "m-tkg/newkun"
-    private static let userAgent = "Newkun"
+    static let repoFullName = "m-tkg/toppinkun"
+    private static let userAgent = "Toppinkun"
 
     enum ServiceError: LocalizedError {
         case decodeFailed

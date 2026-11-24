@@ -41,7 +41,7 @@ final class StatusBarController: NSObject {
             //       （テンプレート画像として自動で読み込まれる）。無ければ SF Symbol で代用する。
             if let template = Self.menuBarImage() {
                 button.image = template
-            } else if let symbol = NSImage(systemSymbolName: "app.dashed", accessibilityDescription: "Newkun") {
+            } else if let symbol = NSImage(systemSymbolName: "app.dashed", accessibilityDescription: "Toppinkun") {
                 symbol.isTemplate = true
                 button.image = symbol
             } else {

@@ -1,7 +1,7 @@
 # kun-template
 
 kun シリーズ（macOS メニューバー常駐アプリ群）の新規開発用テンプレート。
-プレースホルダのアプリ名は **Newkun**（bundle ID `com.mtkg.newkun`）で、そのままビルド・起動できる。
+プレースホルダのアプリ名は **Toppinkun**（bundle ID `com.mtkg.toppinkun`）で、そのままビルド・起動できる。
 
 **このリポジトリは共通ガイド [`CLAUDE_base.md`](./CLAUDE_base.md) の canonical（唯一の一次ソース）も兼ねる**。
 kun シリーズ共通の方針（Swift Package 構成・ローカライズ・アップデート・kunkit 連携・リリース・ブランチ運用）は
@@ -15,7 +15,7 @@ kun シリーズ共通の方針（Swift Package 構成・ローカライズ・�
 gh repo create m-tkg/<name>kun --template m-tkg/kun-template --public --clone
 cd <name>kun
 
-# 2. プレースホルダ名を一括リネームする（Newkun → <Name>kun / newkun → <name>kun）
+# 2. プレースホルダ名を一括リネームする（Toppinkun → <Name>kun / toppinkun → <name>kun）
 bash Scripts/rename.sh <Name>kun    # 例: bash Scripts/rename.sh Fookun
 
 # 3. ビルド・テスト・ローカル起動確認
@@ -34,7 +34,7 @@ open "<Name>kun (Local).app"
 ## 含まれる機能
 
 - **メニューバー常駐**（`LSUIElement` / `.accessory` 起動・多重起動防止・Dock アイコンなし）
-- **2 ターゲット構成**（`NewkunCore` 純粋ロジック＋テスト / `Newkun` 実行ファイル）
+- **2 ターゲット構成**（`ToppinkunCore` 純粋ロジック＋テスト / `Toppinkun` 実行ファイル）
 - **日英ローカライズ**（`L.string` / `Resources/{en,ja}.lproj` / `CFBundleLocalizations`）
 - **自己アップデート**（kunkit `KunUpdateKit` の ETag 付き取得・1時間ごと＋スリープ復帰時のサイレントチェック・
   メニューバーアイコンの赤バッジ・zip DL → 入替 → 再起動）

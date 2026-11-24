@@ -9,11 +9,11 @@ private final class BundleToken {}
 /// `Resources/en.lproj` と `Resources/ja.lproj` の両方に対訳を追加すること。
 ///
 /// - Important: SwiftPM 生成の `Bundle.module` は使わない（見つからないと fatalError）。
-///   `bundle.sh` が配置する `Contents/Resources/Newkun_Newkun.bundle` を含む複数候補を
+///   `bundle.sh` が配置する `Contents/Resources/Toppinkun_Toppinkun.bundle` を含む複数候補を
 ///   自前で探索し、見つからなければ `.main` にフォールバックする。
 enum L {
     private static let bundle: Bundle = {
-        let bundleName = "Newkun_Newkun.bundle"
+        let bundleName = "Toppinkun_Toppinkun.bundle"
         let candidates: [URL?] = [
             Bundle.main.resourceURL,
             Bundle.main.bundleURL,

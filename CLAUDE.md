@@ -1,18 +1,18 @@
-# CLAUDE.md — Newkun
+# CLAUDE.md — Toppinkun
 
 このリポジトリで作業する際のガイド。
 
 **メニューバー常駐アプリ（kun シリーズ）共通の方針は、同梱の [`CLAUDE_base.md`](./CLAUDE_base.md) を参照**
 （Swift Package 構成・日英ローカライズ・アップデート・kunkit 連携・リリース手順・ブランチ運用など）。
-本ファイルには Newkun 固有の事項のみを記す。共通方針を変えるときは `CLAUDE_base.md` を編集する
+本ファイルには Toppinkun 固有の事項のみを記す。共通方針を変えるときは `CLAUDE_base.md` を編集する
 （このリポジトリが共通ガイドの canonical。各 kun アプリはここから追従する）。
 
 ---
 
-# Newkun 固有事項
+# Toppinkun 固有事項
 
 ## 概要
-<!-- TODO: Newkun が何をするアプリかを1〜2行で書く。bundle ID は com.mtkg.newkun。 -->
+<!-- TODO: Toppinkun が何をするアプリかを1〜2行で書く。bundle ID は com.mtkg.toppinkun。 -->
 
 ## 機能
 <!-- TODO: 機能を箇条書きで列挙する（メニュー項目・設定タブ・ホットキー等）。 -->

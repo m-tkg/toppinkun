@@ -51,7 +51,7 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # 純粋ロジックのテスト（NewkunCore）。
+      # 純粋ロジックのテスト（ToppinkunCore）。
       - name: Test
         if: steps.check.outputs.exists == 'false'
         run: swift test
@@ -119,18 +119,18 @@ jobs:
           NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
           NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
         run: |
-          ditto -c -k --keepParent Newkun.app notarize.zip
+          ditto -c -k --keepParent Toppinkun.app notarize.zip
           xcrun notarytool submit notarize.zip \
             --apple-id "$NOTARY_APPLE_ID" \
             --password "$NOTARY_PASSWORD" \
             --team-id "$NOTARY_TEAM_ID" \
             --wait
-          xcrun stapler staple Newkun.app
-          xcrun stapler validate Newkun.app
+          xcrun stapler staple Toppinkun.app
+          xcrun stapler validate Toppinkun.app
 
       - name: Create zip
         if: steps.check.outputs.exists == 'false'
-        run: zip -ry Newkun.zip Newkun.app
+        run: zip -ry Toppinkun.zip Toppinkun.app
 
       - name: Create tag and release
         if: steps.check.outputs.exists == 'false'
@@ -147,7 +147,7 @@ jobs:
             --title "${{ steps.ver.outputs.tag }}" \
             --generate-notes \
             $FLAGS \
-            Newkun.zip
+            Toppinkun.zip
 
       - name: Clean up keychain
         if: ${{ always() && steps.signing.outputs.present == 'true' }}

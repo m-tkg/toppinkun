@@ -1,19 +1,19 @@
 import AppKit
 import OSLog
-import NewkunCore
+import ToppinkunCore
 import KunAppKit
 import KunIntegrationBridge
 import KunSupport
 import KunUpdateKit
 
-private let log = Logger(subsystem: "com.mtkg.newkun", category: "app")
+private let log = Logger(subsystem: "com.mtkg.toppinkun", category: "app")
 
 /// アプリ本体。設定の読込・反映、ステータスバー UI・設定ウィンドウ・
 /// アップデート・kuntraykun 連携の配線を担う。
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let store = KunSettingsStore<Settings>(
-        url: KunSettingsStore<Settings>.defaultURL(appFolderName: "Newkun"), defaultValue: .default)
+        url: KunSettingsStore<Settings>.defaultURL(appFolderName: "Toppinkun"), defaultValue: .default)
 
     private var settings = Settings.default
 
@@ -24,14 +24,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // アップデート関連。
     private let updateService = UpdateService()
-    private let selfUpdater = SelfUpdater(appName: "Newkun")
+    private let selfUpdater = SelfUpdater(appName: "Toppinkun")
     private var availableRelease: ReleaseInfo?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         settings = store.load()
 
         // TODO: ここにアプリ固有機能の配線を足す（監視の開始・ホットキー登録・
-        //       コールバックの接続など）。ロジック本体は NewkunCore に TDD で実装する。
+        //       コールバックの接続など）。ロジック本体は ToppinkunCore に TDD で実装する。
 
         applySettings(settings)
 
@@ -168,7 +168,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showInfo(_ text: String) {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
-        alert.messageText = "Newkun"
+        alert.messageText = "Toppinkun"
         alert.informativeText = text
         alert.runModal()
     }

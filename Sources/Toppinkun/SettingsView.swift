@@ -1,20 +1,20 @@
 import SwiftUI
 import AppKit
 import KunAppKit
-import NewkunCore
+import ToppinkunCore
 
 /// 設定ダイアログの編集状態。変更は即時反映する（Apply/OK は持たない）。
 @MainActor
 final class SettingsViewModel: ObservableObject {
-    @Published var settings: NewkunCore.Settings {
+    @Published var settings: ToppinkunCore.Settings {
         didSet {
             guard settings != oldValue else { return }
             onChange(settings)
         }
     }
-    private let onChange: (NewkunCore.Settings) -> Void
+    private let onChange: (ToppinkunCore.Settings) -> Void
 
-    init(settings: NewkunCore.Settings, onChange: @escaping (NewkunCore.Settings) -> Void) {
+    init(settings: ToppinkunCore.Settings, onChange: @escaping (ToppinkunCore.Settings) -> Void) {
         self.settings = settings
         self.onChange = onChange
     }
