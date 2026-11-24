@@ -10,6 +10,8 @@ private let log = Logger(subsystem: "com.mtkg.toppinkun", category: "pin")
 final class PinController {
     private var state = PinState<PinnedWindow>()
     private let panel = MirrorPanel()
+    /// 固定中のウィンドウを示す枠。
+    private let border = PinBorderPanel()
     private var stream: WindowMirrorStream?
     /// ミラーを表示したい状態か（キャプチャ開始直後で映像がまだ無い間は、最初のフレーム到着で表示する）。
     private var wantsVisible = false
@@ -110,6 +112,8 @@ final class PinController {
         panel.clearContents()
         panel.setFrame(WindowLocator.appKitFrame(fromCG: info.bounds), display: false)
         panel.orderOut(nil)
+        border.surround(WindowLocator.appKitFrame(fromCG: info.bounds))
+        updateBorderVisibility(isWindowOnScreen: info.isOnScreen)
 
         trackTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.track() }
@@ -124,6 +128,7 @@ final class PinController {
         hasFrame = false
         panel.orderOut(nil)
         panel.clearContents()
+        border.orderOut(nil)
     }
 
     /// 他アプリが前面になった: キャプチャを始め、映像があればすぐ表示する。
@@ -132,6 +137,7 @@ final class PinController {
         wantsVisible = true
         refreshFrame()
         if hasFrame { panel.orderFrontRegardless() }
+        border.orderFrontRegardless()
         startCapture(window)
     }
 
@@ -173,17 +179,21 @@ final class PinController {
         guard stream != nil else { return }
         panel.display(surface: surface)
         hasFrame = true
-        if wantsVisible && !panel.isVisible { panel.orderFrontRegardless() }
+        if wantsVisible && !panel.isVisible {
+            panel.orderFrontRegardless()
+            border.orderFrontRegardless() // 枠をミラーより手前に保つ
+        }
     }
 
     /// 固定ウィンドウの消滅・移動・リサイズに追従する。
     private func track() {
         guard let window = state.pinned else { return }
-        guard WindowLocator.info(for: window.windowID) != nil else {
+        guard let info = WindowLocator.info(for: window.windowID) else {
             send(.windowClosed(window))
             return
         }
         refreshFrame()
+        updateBorderVisibility(isWindowOnScreen: info.isOnScreen)
     }
 
     private func refreshFrame() {
@@ -192,7 +202,19 @@ final class PinController {
         let sizeChanged = info.bounds.size != lastBounds.size
         lastBounds = info.bounds
         panel.setFrame(WindowLocator.appKitFrame(fromCG: info.bounds), display: true)
+        border.surround(WindowLocator.appKitFrame(fromCG: info.bounds))
         if sizeChanged { stream?.update(pixelSize: pixelSize(for: info.bounds)) }
+    }
+
+    /// 枠は「ミラー表示中」または「本物のウィンドウが画面上にある」間だけ出す
+    /// （最小化中・別 Space で本物が見えないときに、何も無い場所を囲まないように）。
+    private func updateBorderVisibility(isWindowOnScreen: Bool) {
+        let visible = state.pinned != nil && (wantsVisible || isWindowOnScreen)
+        if visible && !border.isVisible {
+            border.orderFrontRegardless()
+        } else if !visible && border.isVisible {
+            border.orderOut(nil)
+        }
     }
 
     private func pixelSize(for bounds: CGRect) -> CGSize {

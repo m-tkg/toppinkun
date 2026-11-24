@@ -9,6 +9,8 @@ enum WindowLocator {
         let ownerName: String
         let title: String
         let bounds: CGRect
+        /// 画面上に表示されているか（最小化中・別 Space なら false）。
+        let isOnScreen: Bool
     }
 
     /// 指定アプリの最前面の通常ウィンドウ（layer 0）。メニューやツールチップ等の小片は除く。
@@ -39,7 +41,8 @@ enum WindowLocator {
             ownerPID: Int32(pid),
             ownerName: dict[kCGWindowOwnerName as String] as? String ?? "",
             title: dict[kCGWindowName as String] as? String ?? "",
-            bounds: bounds
+            bounds: bounds,
+            isOnScreen: dict[kCGWindowIsOnscreen as String] as? Bool ?? false
         )
     }
 
