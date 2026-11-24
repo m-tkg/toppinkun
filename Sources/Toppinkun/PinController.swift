@@ -11,6 +11,9 @@ final class PinController {
     private var state = PinState<PinnedWindow>()
     private let panel = MirrorPanel()
     private var stream: WindowMirrorStream?
+    /// ミラーを表示したい状態か（キャプチャ開始直後で映像がまだ無い間は、最初のフレーム到着で表示する）。
+    private var wantsVisible = false
+    private var hasFrame = false
     private var trackTimer: Timer?
     private var lastBounds: CGRect = .zero
     private var observers: [NSObjectProtocol] = []
@@ -77,11 +80,10 @@ final class PinController {
                 startMirror(window)
             case .unpinned:
                 stopMirror()
-            case .showMirror:
-                refreshFrame()
-                panel.orderFrontRegardless()
+            case .showMirror(let window):
+                showMirror(window)
             case .hideMirror:
-                panel.orderOut(nil)
+                hideMirror()
             case .noFocusedWindow:
                 NSSound.beep()
             }
@@ -98,29 +100,16 @@ final class PinController {
 
     // MARK: - ミラー
 
+    /// 固定開始。対象アプリが前面なのでミラーは隠したまま、キャプチャもまだ始めない
+    /// （他アプリが前面になった時点で開始する）。
     private func startMirror(_ window: PinnedWindow) {
         guard let info = WindowLocator.info(for: window.windowID) else { return }
         lastBounds = info.bounds
+        hasFrame = false
+        wantsVisible = false
         panel.clearContents()
         panel.setFrame(WindowLocator.appKitFrame(fromCG: info.bounds), display: false)
-        // 固定直後は対象アプリが前面なのでパネルは隠したまま（他アプリが前面になったら出す）。
         panel.orderOut(nil)
-
-        let stream = WindowMirrorStream(
-            windowID: window.windowID,
-            onFrame: { [weak self] surface in self?.panel.display(surface: surface) },
-            onStop: { [weak self] _ in self?.unpin() }
-        )
-        self.stream = stream
-        let pixelSize = pixelSize(for: info.bounds)
-        Task { @MainActor [weak self] in
-            do {
-                try await stream.start(pixelSize: pixelSize)
-            } catch {
-                log.error("mirror start failed: \(error.localizedDescription, privacy: .public)")
-                if self?.stream === stream { self?.unpin() }
-            }
-        }
 
         trackTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.track() }
@@ -130,10 +119,61 @@ final class PinController {
     private func stopMirror() {
         trackTimer?.invalidate()
         trackTimer = nil
-        stream?.stop()
-        stream = nil
+        stopCapture()
+        wantsVisible = false
+        hasFrame = false
         panel.orderOut(nil)
         panel.clearContents()
+    }
+
+    /// 他アプリが前面になった: キャプチャを始め、映像があればすぐ表示する。
+    /// 直前の映像（キャプチャ停止時の最終フレーム）が残っていれば即表示し、最新フレームで置き換わる。
+    private func showMirror(_ window: PinnedWindow) {
+        wantsVisible = true
+        refreshFrame()
+        if hasFrame { panel.orderFrontRegardless() }
+        startCapture(window)
+    }
+
+    /// 固定中アプリが前面になった: ミラーを隠し、キャプチャも止める。
+    /// キャプチャ中は macOS が対象ウィンドウのタイトルバーに「共有中」バッジを重ね、信号機ボタンを塞ぐため。
+    private func hideMirror() {
+        wantsVisible = false
+        panel.orderOut(nil)
+        stopCapture()
+    }
+
+    private func startCapture(_ window: PinnedWindow) {
+        guard stream == nil, let info = WindowLocator.info(for: window.windowID) else { return }
+        let stream = WindowMirrorStream(
+            windowID: window.windowID,
+            onFrame: { [weak self] surface in self?.receive(surface) },
+            onStop: { [weak self] _ in self?.unpin() }
+        )
+        self.stream = stream
+        let pixelSize = pixelSize(for: info.bounds)
+        Task { @MainActor [weak self] in
+            do {
+                try await stream.start(pixelSize: pixelSize)
+                // 開始待ちの間に隠された/付け替えられた場合は、遅れて始まったキャプチャを止める。
+                if self?.stream !== stream { stream.stop() }
+            } catch {
+                log.error("mirror start failed: \(error.localizedDescription, privacy: .public)")
+                if self?.stream === stream { self?.unpin() }
+            }
+        }
+    }
+
+    private func stopCapture() {
+        stream?.stop()
+        stream = nil
+    }
+
+    private func receive(_ surface: IOSurface) {
+        guard stream != nil else { return }
+        panel.display(surface: surface)
+        hasFrame = true
+        if wantsVisible && !panel.isVisible { panel.orderFrontRegardless() }
     }
 
     /// 固定ウィンドウの消滅・移動・リサイズに追従する。
